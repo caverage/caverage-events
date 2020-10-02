@@ -1,11 +1,12 @@
-import { mutations } from './mutations';
-import { getters } from './getters';
-import { actions } from './actions';
-import { MainState } from './state';
+import { mutations } from "./mutations";
+import { getters } from "./getters";
+import { actions } from "./actions";
+import { MainState } from "./state";
 
 const defaultState: MainState = {
+  logInMethod: "",
   isLoggedIn: null,
-  token: '',
+  token: "",
   logInError: false,
   userProfile: null,
   dashboardMiniDrawer: false,

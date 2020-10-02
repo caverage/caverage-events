@@ -23,6 +23,14 @@ export default new Router({
             import(/* webpackChunkName: "login" */ "./views/Login.vue"),
         },
         {
+          path: "login-code/:code",
+          alias: "lc/:code",
+          component: () =>
+            import(
+              /* webpackChunkName: "login-code" */ "./views/LoginCode.vue"
+            ),
+        },
+        {
           path: "recover-password",
           component: () =>
             import(
@@ -120,6 +128,14 @@ export default new Router({
                   component: () =>
                     import(
                       /* webpackChunkName: "main-admin-events" */ "./views/main/admin/AdminEvents.vue"
+                    ),
+                },
+                {
+                  path: "events/:id",
+                  name: "main-admin-events-view",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-admin-events-view" */ "./views/main/admin/AdminEvent.vue"
                     ),
                 },
                 {

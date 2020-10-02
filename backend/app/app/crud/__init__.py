@@ -1,4 +1,5 @@
 from .crud_event import event
+from .crud_login_link import login_link
 from .crud_user import user
 
 # For a new basic set of CRUD operations you could just do

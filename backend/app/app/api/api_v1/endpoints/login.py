@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException
@@ -19,6 +19,29 @@ from app.utils import (
 router = APIRouter()
 
 
+@router.post(
+    "/login/access-token-link-create/{user_id}", response_model=schemas.LoginLink
+)
+def login_access_token_link_create(
+    user_id: int, db: Session = Depends(deps.get_db)
+) -> Any:
+    """
+    TODO: Make this route be protected, currently it's wide open.
+    Probably needs to not use user based authentication though and just be
+    completely locked and called exclusively from somewhere else that gets
+    triggered by a user.
+    """
+    user = crud.user.get(db, id=user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User ID Not Found")
+    login_link = crud.login_link.create(db, obj_in=schemas.LoginLinkCreate(user=user))
+    if not login_link:
+        raise HTTPException(
+            status_code=500, detail="Unknown error occured creating login link"
+        )
+    return login_link
+
+
 @router.post("/login/access-token", response_model=schemas.Token)
 def login_access_token(
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
@@ -33,6 +56,39 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not crud.user.is_active(user):
         raise HTTPException(status_code=400, detail="Inactive user")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": security.create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+    }
+
+
+@router.post("/login/access-token-link/{code}", response_model=schemas.Token)
+def login_access_token_link(code: str, db: Session = Depends(deps.get_db)) -> Any:
+    """
+    """
+    link = crud.login_link.get_by_code(db, code=code)
+
+    if not link:
+        raise HTTPException(status_code=400, detail="Invalid Login Link")
+
+    if datetime.now().timestamp() > link.expires_at_timestamp:
+        raise HTTPException(status_code=400, detail="Login Link Expired")
+
+    user = link.user
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid Login Link")
+    if not crud.user.is_active(user):
+        raise HTTPException(status_code=400, detail="Inactive user")
+
+    if not settings.ALLOW_SUPERUSER_LOGIN_BY_CODE:
+        if crud.user.is_superuser(user):
+            raise HTTPException(
+                status_code=400, detail="Admins cannot login via a code"
+            )
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": security.create_access_token(

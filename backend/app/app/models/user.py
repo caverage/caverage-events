@@ -23,4 +23,4 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
-    events = relationship("Event", secondary=UserEvent, backref="attendees")
+    events = relationship("Event", secondary=UserEvent, back_populates="attendees")

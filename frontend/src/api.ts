@@ -25,6 +25,9 @@ export const api = {
 
     return axios.post(`${apiUrl}/api/v1/login/access-token`, params);
   },
+  async logInGetTokenCode(code: string) {
+    return axios.post(`${apiUrl}/api/v1/login/access-token-link/${code}`);
+  },
   async getMe(token: string) {
     return axios.get<IUserProfile>(
       `${apiUrl}/api/v1/users/me`,

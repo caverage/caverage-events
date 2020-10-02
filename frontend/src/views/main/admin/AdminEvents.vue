@@ -10,7 +10,17 @@
         <td>{{ props.item.name }}</td>
         <td>{{ props.item.date }}</td>
         <td>{{ props.item.attendees }}</td>
-        <td class="justify-center layout px-0">
+        <td class="justify-center">
+          <v-tooltip top>
+            <span>View</span>
+            <v-btn
+              slot="activator"
+              flat
+              :to="{name: 'main-admin-events-view', params: {id: props.item.id}}"
+            >
+              <v-icon>preview</v-icon>
+            </v-btn>
+          </v-tooltip>
           <v-tooltip top>
             <span>Edit</span>
             <v-btn

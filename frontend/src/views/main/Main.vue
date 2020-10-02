@@ -1,6 +1,12 @@
 <template>
   <div>
-    <v-navigation-drawer persistent :mini-variant="miniDrawer" v-model="showDrawer" fixed app>
+    <v-navigation-drawer
+      persistent
+      :mini-variant="miniDrawer"
+      v-model="showDrawer"
+      fixed
+      app
+    >
       <v-layout column fill-height>
         <v-list>
           <v-subheader>User Dashboard</v-subheader>
@@ -86,7 +92,9 @@
           <v-divider></v-divider>
           <v-list-tile @click="switchMiniDrawer">
             <v-list-tile-action>
-              <v-icon v-html="miniDrawer ? 'chevron_right' : 'chevron_left'"></v-icon>
+              <v-icon
+                v-html="miniDrawer ? 'chevron_right' : 'chevron_left'"
+              ></v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
               <v-list-tile-title>Collapse</v-list-tile-title>
@@ -128,7 +136,7 @@
     </v-content>
     <v-footer class="pa-3" fixed app>
       <v-spacer></v-spacer>
-      <span>&copy; {{appName}}</span>
+      <span>&copy; {{ appName }}</span>
     </v-footer>
   </div>
 </template>
@@ -141,6 +149,7 @@ import {
   readDashboardMiniDrawer,
   readDashboardShowDrawer,
   readHasAdminAccess,
+  readLogInMethod,
 } from "@/store/main/getters";
 import {
   commitSetDashboardShowDrawer,
