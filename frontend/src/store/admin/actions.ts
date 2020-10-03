@@ -146,6 +146,27 @@ export const actions = {
       await dispatchCheckApiError(context, error);
     }
   },
+  async actionDeleteUser(context: MainContext, payload: { user_id: number }) {
+    try {
+      const loadingNotification = { content: "deleting", showProgress: true };
+      commitAddNotification(context, loadingNotification);
+      const response = (
+        await Promise.all([
+          api.deleteUser(context.rootState.main.token, payload.user_id),
+          await new Promise((resolve, reject) =>
+            setTimeout(() => resolve(), 500)
+          ),
+        ])
+      )[0];
+      commitRemoveNotification(context, loadingNotification);
+      commitAddNotification(context, {
+        content: "User successfully deleted",
+        color: "success",
+      });
+    } catch (error) {
+      await dispatchCheckApiError(context, error);
+    }
+  },
 };
 
 const { dispatch } = getStoreAccessors<AdminState, State>("");
@@ -153,6 +174,7 @@ const { dispatch } = getStoreAccessors<AdminState, State>("");
 export const dispatchCreateUser = dispatch(actions.actionCreateUser);
 export const dispatchGetUsers = dispatch(actions.actionGetUsers);
 export const dispatchUpdateUser = dispatch(actions.actionUpdateUser);
+export const dispatchDeleteUser = dispatch(actions.actionDeleteUser);
 
 export const dispatchCreateEvent = dispatch(actions.actionCreateEvent);
 export const dispatchGetEvents = dispatch(actions.actionGetEvents);

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -19,12 +19,10 @@ from app.utils import (
 router = APIRouter()
 
 
-@router.post(
-    "/login/access-token-link-create/{user_id}", response_model=schemas.LoginLink
-)
+@router.post("/login/access-token-link-create/{user_id}")
 def login_access_token_link_create(
     user_id: int, db: Session = Depends(deps.get_db)
-) -> Any:
+) -> Optional[str]:
     """
     TODO: Make this route be protected, currently it's wide open.
     Probably needs to not use user based authentication though and just be
@@ -39,7 +37,7 @@ def login_access_token_link_create(
         raise HTTPException(
             status_code=500, detail="Unknown error occured creating login link"
         )
-    return login_link
+    return login_link.code
 
 
 @router.post("/login/access-token", response_model=schemas.Token)
@@ -77,6 +75,9 @@ def login_access_token_link(code: str, db: Session = Depends(deps.get_db)) -> An
     if datetime.now().timestamp() > link.expires_at_timestamp:
         raise HTTPException(status_code=400, detail="Login Link Expired")
 
+    if not link.active:
+        raise HTTPException(status_code=400, detail="Login Link Already Used")
+
     user = link.user
     if not user:
         raise HTTPException(status_code=400, detail="Invalid Login Link")
@@ -89,6 +90,7 @@ def login_access_token_link(code: str, db: Session = Depends(deps.get_db)) -> An
                 status_code=400, detail="Admins cannot login via a code"
             )
 
+    crud.login_link.disable(db, db_obj=link)
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {
         "access_token": security.create_access_token(

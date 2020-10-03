@@ -93,24 +93,21 @@ def read_user_me(
 def create_user_open(
     *,
     db: Session = Depends(deps.get_db),
-    password: str = Body(...),
-    email: EmailStr = Body(...),
     number: str = Body(...),
-    full_name: str = Body(None),
+    full_name: str = Body(...),
+    email: EmailStr = Body(None),
+    password: str = Body(None),
 ) -> Any:
     """
     Create new user without the need to be logged in.
     """
-    if not settings.USERS_OPEN_REGISTRATION:
-        raise HTTPException(
-            status_code=403,
-            detail="Open user registration is forbidden on this server",
-        )
-    user = crud.user.get_by_email(db, email=email)
+    if not number or not full_name:
+        raise HTTPException(status_code=422, detail="")
+    user = crud.user.get_by_number(db, number=number)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists in the system",
+            detail="The user with this number already exists in the system",
         )
     user_in = schemas.UserCreate(
         password=password, email=email, full_name=full_name, number=number
@@ -157,3 +154,21 @@ def update_user(
         )
     user = crud.user.update(db, db_obj=user, obj_in=user_in)
     return user
+
+
+@router.delete("/{user_id}")
+def delete_user(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_id: int,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Delete a user.
+    """
+    user = crud.user.get(db, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404, detail="This user does not exist in the system",
+        )
+    crud.user.remove(db, id=user_id)

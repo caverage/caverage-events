@@ -166,6 +166,7 @@ export const actions = {
       router.currentRoute.path === "/login" ||
       router.currentRoute.path.startsWith("/login-code") ||
       router.currentRoute.path.startsWith("/lc") ||
+      router.currentRoute.path.startsWith("/register") ||
       router.currentRoute.path === "/"
     ) {
       router.push("/main");
@@ -243,6 +244,48 @@ export const actions = {
       });
     }
   },
+  async actionRegister(
+    context: MainContext,
+    payload: {
+      number: string;
+      name: string;
+      username?: string;
+      password?: string;
+    }
+  ) {
+    const loadingNotification = {
+      content: "Registering",
+      showProgress: true,
+    };
+    try {
+      commitAddNotification(context, loadingNotification);
+      const user = (
+        await Promise.all([
+          api.register(
+            payload.number,
+            payload.name,
+            payload.username,
+            payload.password
+          ),
+          await new Promise((resolve, reject) =>
+            setTimeout(() => resolve(), 500)
+          ),
+        ])
+      )[0];
+      commitRemoveNotification(context, loadingNotification);
+      const code = (
+        await Promise.all([
+          api.createLogInCode(user.data.id),
+          await new Promise((resolve, reject) =>
+            setTimeout(() => resolve(), 500)
+          ),
+        ])
+      )[0];
+      await dispatchLogInCode(context, { code: code.data.toString() });
+    } catch (error) {
+      commitRemoveNotification(context, loadingNotification);
+    }
+  },
 };
 
 const { dispatch } = getStoreAccessors<MainState | any, State>("");
@@ -263,3 +306,4 @@ export const dispatchUpdateUserProfile = dispatch(
 export const dispatchRemoveNotification = dispatch(actions.removeNotification);
 export const dispatchPasswordRecovery = dispatch(actions.passwordRecovery);
 export const dispatchResetPassword = dispatch(actions.resetPassword);
+export const dispatchRegister = dispatch(actions.actionRegister);

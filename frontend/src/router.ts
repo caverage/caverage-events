@@ -15,6 +15,11 @@ export default new Router({
         import(/* webpackChunkName: "start" */ "./views/main/Start.vue"),
       children: [
         {
+          path: "register",
+          component: () =>
+            import(/* webpackChunkname: "register" */ "./views/Register.vue"),
+        },
+        {
           path: "login",
           // route level code-splitting
           // this generates a separate chunk (about.[hash].js) for this route
@@ -101,6 +106,14 @@ export default new Router({
                   component: () =>
                     import(
                       /* webpackChunkName: "main-admin-users" */ "./views/main/admin/AdminUsers.vue"
+                    ),
+                },
+                {
+                  path: "users/view/:id",
+                  name: "main-admin-users-view",
+                  component: () =>
+                    import(
+                      /* webpackChunkName: "main-admin-users-view" */ "./views/main/admin/AdminUser.vue"
                     ),
                 },
                 {

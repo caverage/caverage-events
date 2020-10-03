@@ -10,13 +10,16 @@
         <td>{{ props.item.name }}</td>
         <td>{{ props.item.date }}</td>
         <td>{{ props.item.attendees }}</td>
-        <td class="justify-center">
+        <td class="justify-center layout 0px">
           <v-tooltip top>
             <span>View</span>
             <v-btn
               slot="activator"
               flat
-              :to="{name: 'main-admin-events-view', params: {id: props.item.id}}"
+              :to="{
+                name: 'main-admin-events-view',
+                params: { id: props.item.id },
+              }"
             >
               <v-icon>preview</v-icon>
             </v-btn>
@@ -26,7 +29,10 @@
             <v-btn
               slot="activator"
               flat
-              :to="{name: 'main-admin-events-edit', params: {id: props.item.id}}"
+              :to="{
+                name: 'main-admin-events-edit',
+                params: { id: props.item.id },
+              }"
             >
               <v-icon>edit</v-icon>
             </v-btn>
@@ -68,6 +74,7 @@ export default class AdminUsers extends Vue {
     {
       text: "Actions",
       value: "id",
+      align: "center",
     },
   ];
   get users() {

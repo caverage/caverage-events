@@ -7,6 +7,7 @@ from app.db.base_class import Base
 
 if TYPE_CHECKING:
     from .event import Event  # noqa: F401
+    from .login_link import LoginLink  # noqa: F401
 
 UserEvent = Table(
     "user_event",
@@ -19,9 +20,10 @@ UserEvent = Table(
 class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True)
+    hashed_password = Column(String)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
     events = relationship("Event", secondary=UserEvent, back_populates="attendees")
-    number = Column(String(11), index=True, unique=True)
+    login_links = relationship("LoginLink", uselist=True)
+    number = Column(String(11), index=True, unique=True, nullable=False)

@@ -43,5 +43,12 @@ class CRUDLoginLink(CRUDBase[LoginLink, LoginLinkCreate, LoginLinkUpdate]):
     def is_active(self, db_obj: LoginLink) -> bool:
         return db_obj.active
 
+    def disable(self, db: Session, *, db_obj: LoginLink) -> bool:
+        setattr(db_obj, "active", False)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj.active
+
 
 login_link = CRUDLoginLink(LoginLink)

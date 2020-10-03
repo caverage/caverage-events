@@ -14,9 +14,9 @@ class UserBase(BaseModel):
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    email: EmailStr
-    password: str
+    full_name: str
     number: str
+    password: Optional[str] = None
 
 
 # Properties to receive via API on update
@@ -38,4 +38,4 @@ class User(UserInDBBase):
 
 # Additional properties stored in DB
 class UserInDB(UserInDBBase):
-    hashed_password: str
+    hashed_password: Optional[str]
