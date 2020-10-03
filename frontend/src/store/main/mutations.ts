@@ -16,9 +16,6 @@ export const mutations = {
   setLogInError(state: MainState, payload: boolean) {
     state.logInError = payload;
   },
-  setLogInErrorCode(state: MainState, payload: boolean) {
-    state.logInErrorCode = payload;
-  },
   setUserProfile(state: MainState, payload: IUserProfile) {
     state.userProfile = payload;
   },
@@ -49,7 +46,6 @@ export const commitSetDashboardShowDrawer = commit(
 export const commitSetLogInMethod = commit(mutations.setLogInMethod);
 export const commitSetLoggedIn = commit(mutations.setLoggedIn);
 export const commitSetLogInError = commit(mutations.setLogInError);
-export const commitSetLogInErrorCode = commit(mutations.setLogInErrorCode);
 export const commitSetToken = commit(mutations.setToken);
 export const commitSetUserProfile = commit(mutations.setUserProfile);
 export const commitAddNotification = commit(mutations.addNotification);

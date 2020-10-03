@@ -57,6 +57,7 @@ def update_user_me(
     db: Session = Depends(deps.get_db),
     password: str = Body(None),
     full_name: str = Body(None),
+    number: str = Body(None),
     email: EmailStr = Body(None),
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
@@ -71,6 +72,8 @@ def update_user_me(
         user_in.full_name = full_name
     if email is not None:
         user_in.email = email
+    if number is not None:
+        user_in.number = number
     user = crud.user.update(db, db_obj=current_user, obj_in=user_in)
     return user
 
@@ -92,6 +95,7 @@ def create_user_open(
     db: Session = Depends(deps.get_db),
     password: str = Body(...),
     email: EmailStr = Body(...),
+    number: str = Body(...),
     full_name: str = Body(None),
 ) -> Any:
     """
@@ -108,7 +112,9 @@ def create_user_open(
             status_code=400,
             detail="The user with this username already exists in the system",
         )
-    user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
+    user_in = schemas.UserCreate(
+        password=password, email=email, full_name=full_name, number=number
+    )
     user = crud.user.create(db, obj_in=user_in)
     return user
 

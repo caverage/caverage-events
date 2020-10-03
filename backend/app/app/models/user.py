@@ -24,3 +24,4 @@ class User(Base):
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
     events = relationship("Event", secondary=UserEvent, back_populates="attendees")
+    number = Column(String(11), index=True, unique=True)

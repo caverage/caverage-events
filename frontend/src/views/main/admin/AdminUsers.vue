@@ -10,6 +10,7 @@
     <v-data-table :headers="headers" :items="users">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.name }}</td>
+        <td>{{ props.item.number }}</td>
         <td>{{ props.item.email }}</td>
         <td>{{ props.item.full_name }}</td>
         <td><v-icon v-if="props.item.is_active">checkmark</v-icon></td>
@@ -17,7 +18,14 @@
         <td class="justify-center layout px-0">
           <v-tooltip top>
             <span>Edit</span>
-            <v-btn slot="activator" flat :to="{name: 'main-admin-users-edit', params: {id: props.item.id}}">
+            <v-btn
+              slot="activator"
+              flat
+              :to="{
+                name: 'main-admin-users-edit',
+                params: { id: props.item.id },
+              }"
+            >
               <v-icon>edit</v-icon>
             </v-btn>
           </v-tooltip>
@@ -28,48 +36,54 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { Store } from 'vuex';
-import { IUserProfile } from '@/interfaces';
-import { readAdminUsers } from '@/store/admin/getters';
-import { dispatchGetUsers } from '@/store/admin/actions';
+import { Component, Vue } from "vue-property-decorator";
+import { Store } from "vuex";
+import { IUserProfile } from "@/interfaces";
+import { readAdminUsers } from "@/store/admin/getters";
+import { dispatchGetUsers } from "@/store/admin/actions";
 
 @Component
 export default class AdminUsers extends Vue {
   public headers = [
     {
-      text: 'Name',
+      text: "Name",
       sortable: true,
-      value: 'name',
-      align: 'left',
+      value: "name",
+      align: "left",
     },
     {
-      text: 'Email',
+      text: "Phone Number",
       sortable: true,
-      value: 'email',
-      align: 'left',
+      value: "name",
+      align: "left",
     },
     {
-      text: 'Full Name',
+      text: "Email",
       sortable: true,
-      value: 'full_name',
-      align: 'left',
+      value: "email",
+      align: "left",
     },
     {
-      text: 'Is Active',
+      text: "Full Name",
       sortable: true,
-      value: 'isActive',
-      align: 'left',
+      value: "full_name",
+      align: "left",
     },
     {
-      text: 'Is Superuser',
+      text: "Is Active",
       sortable: true,
-      value: 'isSuperuser',
-      align: 'left',
+      value: "isActive",
+      align: "left",
     },
     {
-      text: 'Actions',
-      value: 'id',
+      text: "Is Superuser",
+      sortable: true,
+      value: "isSuperuser",
+      align: "left",
+    },
+    {
+      text: "Actions",
+      value: "id",
     },
   ];
   get users() {

@@ -6,11 +6,7 @@
       </v-card-title>
       <v-card-text>
         <template>
-          <v-form
-            v-model="valid"
-            ref="form"
-            lazy-validation
-          >
+          <v-form v-model="valid" ref="form" lazy-validation>
             <v-text-field
               label="Full Name"
               v-model="fullName"
@@ -25,6 +21,12 @@
               :error-messages="errors.collect('email')"
               required
             ></v-text-field>
+            <v-text-field
+              label="Phone Number"
+              v-model="number"
+              required
+              maxlength="10"
+            ></v-text-field>
           </v-form>
         </template>
       </v-card-text>
@@ -32,10 +34,7 @@
         <v-spacer></v-spacer>
         <v-btn @click="cancel">Cancel</v-btn>
         <v-btn @click="reset">Reset</v-btn>
-        <v-btn
-          @click="submit"
-          :disabled="!valid"
-        >
+        <v-btn @click="submit" :disabled="!valid">
           Save
         </v-btn>
       </v-card-actions>
@@ -44,23 +43,25 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { Store } from 'vuex';
-import { IUserProfileUpdate } from '@/interfaces';
-import { readUserProfile } from '@/store/main/getters';
-import { dispatchUpdateUserProfile } from '@/store/main/actions';
+import { Component, Vue } from "vue-property-decorator";
+import { Store } from "vuex";
+import { IUserProfileUpdate } from "@/interfaces";
+import { readUserProfile } from "@/store/main/getters";
+import { dispatchUpdateUserProfile } from "@/store/main/actions";
 
 @Component
 export default class UserProfileEdit extends Vue {
   public valid = true;
-  public fullName: string = '';
-  public email: string = '';
+  public fullName: string = "";
+  public email: string = "";
+  public number: string = "";
 
   public created() {
     const userProfile = readUserProfile(this.$store);
     if (userProfile) {
       this.fullName = userProfile.full_name;
       this.email = userProfile.email;
+      this.number = userProfile.number;
     }
   }
 
@@ -73,6 +74,7 @@ export default class UserProfileEdit extends Vue {
     if (userProfile) {
       this.fullName = userProfile.full_name;
       this.email = userProfile.email;
+      this.number = userProfile.number;
     }
   }
 
@@ -89,8 +91,11 @@ export default class UserProfileEdit extends Vue {
       if (this.email) {
         updatedProfile.email = this.email;
       }
+      if (this.number) {
+        updatedProfile.number = this.number;
+      }
       await dispatchUpdateUserProfile(this.$store, updatedProfile);
-      this.$router.push('/main/profile');
+      this.$router.push("/main/profile");
     }
   }
 }

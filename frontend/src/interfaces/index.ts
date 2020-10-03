@@ -4,6 +4,7 @@ export interface IUserProfile {
   is_superuser: boolean;
   full_name: string;
   id: number;
+  number: string;
 }
 
 export interface IUserProfileUpdate {
@@ -12,6 +13,7 @@ export interface IUserProfileUpdate {
   password?: string;
   is_active?: boolean;
   is_superuser?: boolean;
+  number?: string;
 }
 
 export interface IUserProfileCreate {
@@ -20,6 +22,7 @@ export interface IUserProfileCreate {
   password?: string;
   is_active?: boolean;
   is_superuser?: boolean;
+  number: string;
 }
 
 export interface IEvent {
