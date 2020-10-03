@@ -1,11 +1,21 @@
 <template>
   <div>
     <v-toolbar light>
-      <v-toolbar-title>Manage Events</v-toolbar-title>
+      <v-toolbar-title style="padding-right: 10px;"
+        >Manage Events</v-toolbar-title
+      >
+      <v-text-field
+        style="padding-bottom: 10px;"
+        v-model="search"
+        append-icon="search"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
       <v-spacer></v-spacer>
       <v-btn color="primary" to="/main/admin/events/create">Create Event</v-btn>
     </v-toolbar>
-    <v-data-table :headers="headers" :items="users">
+    <v-data-table :headers="headers" :items="events" :search="search">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.name }}</td>
         <td>{{ props.item.date }}</td>
@@ -37,6 +47,12 @@
               <v-icon>edit</v-icon>
             </v-btn>
           </v-tooltip>
+          <v-tooltip top>
+            <span>Delete</span>
+            <v-btn slot="activator" flat @click="deleteEvent(props.item.id)">
+              <v-icon>delete</v-icon>
+            </v-btn>
+          </v-tooltip>
         </td>
       </template>
     </v-data-table>
@@ -48,10 +64,12 @@ import { Component, Vue } from "vue-property-decorator";
 import { Store } from "vuex";
 import { IEvent } from "@/interfaces";
 import { readAdminEvents } from "@/store/admin/getters";
-import { dispatchGetEvents } from "@/store/admin/actions";
+import { dispatchDeleteEvent, dispatchGetEvents } from "@/store/admin/actions";
 
 @Component
-export default class AdminUsers extends Vue {
+export default class AdminEvents extends Vue {
+  public events: IEvent[] = [];
+  public search: string = "";
   public headers = [
     {
       text: "Name",
@@ -77,12 +95,16 @@ export default class AdminUsers extends Vue {
       align: "center",
     },
   ];
-  get users() {
-    return readAdminEvents(this.$store);
+
+  public async deleteEvent(id: number) {
+    await dispatchDeleteEvent(this.$store, { event_id: id });
+    await dispatchGetEvents(this.$store);
+    this.events = readAdminEvents(this.$store);
   }
 
   public async mounted() {
     await dispatchGetEvents(this.$store);
+    this.events = readAdminEvents(this.$store);
   }
 }
 </script>

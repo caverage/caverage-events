@@ -8,7 +8,7 @@ import {
   IEventUpdate,
   IEventCreate,
 } from "./interfaces";
-import { dispatchDeleteUser } from "./store/admin/actions";
+import { dispatchDeleteEvent, dispatchDeleteUser } from "./store/admin/actions";
 
 function authHeaders(token: string) {
   return {
@@ -90,6 +90,12 @@ export const api = {
   },
   async createEvent(token: string, data: IEventCreate) {
     return axios.post(`${apiUrl}/api/v1/events/`, data, authHeaders(token));
+  },
+  async deleteEvent(token: string, event_id: number) {
+    return axios.delete(
+      `${apiUrl}/api/v1/events/${event_id}`,
+      authHeaders(token)
+    );
   },
   async register(
     number: string,

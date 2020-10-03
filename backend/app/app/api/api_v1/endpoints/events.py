@@ -73,3 +73,21 @@ def update_event(
         )
     event = crud.event.update(db, db_obj=event, obj_in=event_in)
     return event
+
+
+@router.delete("/{event_id}")
+def delete_event(
+    *,
+    db: Session = Depends(deps.get_db),
+    event_id: int,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Delete an event.
+    """
+    event = crud.event.get(db, id=event_id)
+    if not event:
+        raise HTTPException(
+            status_code=404, detail="This event does not exist in the system",
+        )
+    crud.event.remove(db, id=event_id)
