@@ -1,4 +1,5 @@
 from .crud_event import event
+from .crud_invite import invite
 from .crud_login_link import login_link
 from .crud_user import user
 

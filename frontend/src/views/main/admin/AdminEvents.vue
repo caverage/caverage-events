@@ -19,8 +19,30 @@
       <template slot="items" slot-scope="props">
         <td>{{ props.item.name }}</td>
         <td>{{ props.item.date }}</td>
-        <td>{{ props.item.attendees }}</td>
+        <td>
+          <span v-for="(invite, index) in props.item.invites" :key="index"
+            ><span v-if="invite.status == 'YES'"
+              >{{ invite.user.full_name
+              }}<span v-if="index != props.item.invites.length - 1"
+                >,
+              </span></span
+            ></span
+          >
+        </td>
         <td class="justify-center layout 0px">
+          <v-tooltip top>
+            <span>Invite</span>
+            <v-btn
+              slot="activator"
+              flat
+              :to="{
+                name: 'main-admin-events-invite',
+                params: { id: props.item.id },
+              }"
+            >
+              <v-icon>person_add</v-icon>
+            </v-btn>
+          </v-tooltip>
           <v-tooltip top>
             <span>View</span>
             <v-btn

@@ -112,6 +112,7 @@ export default class AdminUsers extends Vue {
     },
     {
       text: "Actions",
+      sortable: false,
       value: "id",
       align: "center",
     },

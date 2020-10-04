@@ -1,6 +1,8 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
+
+from .invite import Invite
 
 
 # Shared properties
@@ -8,6 +10,7 @@ class EventBase(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     date: Optional[str] = None
+    invites: Optional[List[Invite]] = None
 
 
 # Properties to receive on item creation

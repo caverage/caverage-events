@@ -110,4 +110,14 @@ export const api = {
       password: password,
     });
   },
+  async sendInvites(
+    token: string,
+    data: { user_ids: number[]; event_id: number }
+  ) {
+    return axios.post(
+      `${apiUrl}/api/v1/events/invites`,
+      data,
+      authHeaders(token)
+    );
+  },
 };

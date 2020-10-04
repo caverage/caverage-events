@@ -5,6 +5,7 @@ export interface IUserProfile {
   full_name: string;
   id: number;
   number: string;
+  invites: IInvite[];
 }
 
 export interface IUserProfileUpdate {
@@ -29,8 +30,8 @@ export interface IEvent {
   name: string;
   description: string;
   date: string;
-  attendees: IUserProfile[];
   id: number;
+  invites: IInvite[];
 }
 
 export interface IEventUpdate {
@@ -45,4 +46,10 @@ export interface IEventCreate {
   description?: string;
   date?: string;
   attendees?: IUserProfile[];
+}
+
+export interface IInvite {
+  user: IUserProfile;
+  event: IEvent;
+  status: string;
 }

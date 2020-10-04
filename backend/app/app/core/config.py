@@ -82,6 +82,10 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    SMS_DID: str
+    SMS_APIKEY: str
+    SMS_API_URI: str
+
     class Config:
         case_sensitive = True
 
