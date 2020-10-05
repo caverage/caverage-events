@@ -1,7 +1,7 @@
 import enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -28,3 +28,4 @@ class Invite(Base):
         Enum(InviteStatus), nullable=False, default=InviteStatus.NO_RESPONSE
     )
     sent = Column(Boolean, default=False, nullable=False)
+    code = Column(String, index=True, unique=True)

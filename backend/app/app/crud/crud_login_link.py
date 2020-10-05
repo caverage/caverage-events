@@ -21,7 +21,7 @@ class CRUDLoginLink(CRUDBase[LoginLink, LoginLinkCreate, LoginLinkUpdate]):
             link = self.get_by_code(db, code=code)
         found_user = user.get(db, id=obj_in.user.id)
         assert found_user is not None
-        db_obj = LoginLink(code=code.upper(), user=found_user)
+        db_obj = LoginLink(code=code.upper(), user_id=found_user.id)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

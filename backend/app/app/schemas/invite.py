@@ -11,6 +11,7 @@ class InviteBase(BaseModel):
     event_id: Optional[int] = None
     user_id: Optional[int] = None
     status: Optional[InviteStatus] = None
+    code: Optional[str] = None
 
 
 class InviteAPICreate(BaseModel):
@@ -35,6 +36,7 @@ class InviteInDBBase(InviteBase):
     id: int
     event_id: int
     user_id: int
+    code: str
 
     class Config:
         orm_mode = True

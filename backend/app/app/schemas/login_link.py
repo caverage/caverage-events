@@ -10,7 +10,7 @@ from .user import User
 class LoginLinkBase(BaseModel):
     code: Optional[str] = None
     active: Optional[bool] = None
-    user: Optional[User] = None
+    user_id: Optional[int] = None
 
 
 # Properties to receive on item creation
