@@ -5,13 +5,12 @@ import { dispatchLogInCode } from "@/store/main/actions";
 
 @Component
 export default class Login extends Vue {
-  mounted() {
-    dispatchLogInCode(this.$store, {
-      code: this.$router.currentRoute.params.code,
-    });
-  }
+    mounted() {
+        dispatchLogInCode(this.$store, {
+            code: this.$router.currentRoute.params.code,
+        });
+    }
 }
 </script>
 
-<style>
-</style>
+<style></style>

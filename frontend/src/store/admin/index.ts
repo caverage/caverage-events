@@ -4,13 +4,13 @@ import { actions } from "./actions";
 import { AdminState } from "./state";
 
 const defaultState: AdminState = {
-  users: [],
-  events: [],
+    users: [],
+    events: [],
 };
 
 export const adminModule = {
-  state: defaultState,
-  mutations,
-  actions,
-  getters,
+    state: defaultState,
+    mutations,
+    actions,
+    getters,
 };

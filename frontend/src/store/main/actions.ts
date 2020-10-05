@@ -6,293 +6,316 @@ import { getStoreAccessors } from "typesafe-vuex";
 import { ActionContext } from "vuex";
 import { State } from "../state";
 import {
-  commitAddNotification,
-  commitRemoveNotification,
-  commitSetLogInMethod,
-  commitSetLoggedIn,
-  commitSetLogInError,
-  commitSetToken,
-  commitSetUserProfile,
+    commitAddNotification,
+    commitRemoveNotification,
+    commitSetLogInMethod,
+    commitSetLoggedIn,
+    commitSetLogInError,
+    commitSetToken,
+    commitSetUserProfile,
 } from "./mutations";
 import { readLogInMethod } from "./getters";
 import { AppNotification, MainState } from "./state";
 
 type MainContext = ActionContext<MainState, State>;
 
-export const actions = {
-  async actionLogIn(
-    context: MainContext,
-    payload: { username: string; password: string }
-  ) {
-    commitSetLogInMethod(context, "account");
-    try {
-      const response = await api.logInGetToken(
-        payload.username,
-        payload.password
-      );
-      const token = response.data.access_token;
-      if (token) {
-        saveLocalToken(token);
-        commitSetToken(context, token);
-        commitSetLoggedIn(context, true);
-        commitSetLogInError(context, false);
-        await dispatchGetUserProfile(context);
-        await dispatchRouteLoggedIn(context);
-        commitAddNotification(context, {
-          content: "Logged in",
-          color: "success",
-        });
-      } else {
-        await dispatchLogOut(context);
-      }
-    } catch (err) {
-      commitSetLogInError(context, true);
-      await dispatchLogOut(context);
-    }
-  },
-  async actionLogInCode(context: MainContext, payload: { code: string }) {
-    commitSetLogInMethod(context, "code");
-    try {
-      const response = await api.logInGetTokenCode(payload.code);
-      const token = response.data.access_token;
-      if (token) {
-        saveLocalToken(token);
-        commitSetToken(context, token);
-        commitSetLoggedIn(context, true);
-        commitSetLogInError(context, false);
-        await dispatchGetUserProfile(context);
-        await dispatchRouteLoggedIn(context);
-        commitAddNotification(context, {
-          content: "Logged in",
-          color: "success",
-        });
-      } else {
-        await dispatchLogOut(context);
-      }
-    } catch (err) {
-      commitSetLogInError(context, true);
-      await dispatchLogOut(context);
-    }
-  },
-  async actionGetUserProfile(context: MainContext) {
-    try {
-      const response = await api.getMe(context.state.token);
-      if (response.data) {
-        commitSetUserProfile(context, response.data);
-      }
-    } catch (error) {
-      await dispatchCheckApiError(context, error);
-    }
-  },
-  async actionUpdateUserProfile(context: MainContext, payload) {
-    try {
-      const loadingNotification = { content: "saving", showProgress: true };
-      commitAddNotification(context, loadingNotification);
-      const response = (
-        await Promise.all([
-          api.updateMe(context.state.token, payload),
-          await new Promise((resolve, reject) =>
-            setTimeout(() => resolve(), 500)
-          ),
-        ])
-      )[0];
-      commitSetUserProfile(context, response.data);
-      commitRemoveNotification(context, loadingNotification);
-      commitAddNotification(context, {
-        content: "Profile successfully updated",
-        color: "success",
-      });
-    } catch (error) {
-      await dispatchCheckApiError(context, error);
-    }
-  },
-  async actionCheckLoggedIn(context: MainContext) {
-    if (!context.state.isLoggedIn) {
-      let token = context.state.token;
-      if (!token) {
-        const localToken = getLocalToken();
-        if (localToken) {
-          commitSetToken(context, localToken);
-          token = localToken;
-        }
-      }
-      if (token) {
+/** Login Actions */
+const login = {
+    async actionLogIn(
+        context: MainContext,
+        payload: { username: string; password: string }
+    ) {
+        commitSetLogInMethod(context, "account");
         try {
-          const response = await api.getMe(token);
-          commitSetLoggedIn(context, true);
-          commitSetUserProfile(context, response.data);
-        } catch (error) {
-          await dispatchRemoveLogIn(context);
+            const response = await api.logInGetToken(
+                payload.username,
+                payload.password
+            );
+            const token = response.data.access_token;
+            if (token) {
+                saveLocalToken(token);
+                commitSetToken(context, token);
+                commitSetLoggedIn(context, true);
+                commitSetLogInError(context, false);
+                await dispatchGetUserProfile(context);
+                await dispatchRouteLoggedIn(context);
+                commitAddNotification(context, {
+                    content: "Logged in",
+                    color: "success",
+                });
+            } else {
+                await dispatchLogOut(context);
+            }
+        } catch (err) {
+            commitSetLogInError(context, true);
+            await dispatchLogOut(context);
         }
-      } else {
+    },
+    async actionLogInCode(context: MainContext, payload: { code: string }) {
+        commitSetLogInMethod(context, "code");
+        try {
+            const response = await api.logInGetTokenCode(payload.code);
+            const token = response.data.access_token;
+            if (token) {
+                saveLocalToken(token);
+                commitSetToken(context, token);
+                commitSetLoggedIn(context, true);
+                commitSetLogInError(context, false);
+                await dispatchGetUserProfile(context);
+                await dispatchRouteLoggedIn(context);
+                commitAddNotification(context, {
+                    content: "Logged in",
+                    color: "success",
+                });
+            } else {
+                await dispatchLogOut(context);
+            }
+        } catch (err) {
+            commitSetLogInError(context, true);
+            await dispatchLogOut(context);
+        }
+    },
+    async actionCheckLoggedIn(context: MainContext) {
+        if (!context.state.isLoggedIn) {
+            let token = context.state.token;
+            if (!token) {
+                const localToken = getLocalToken();
+                if (localToken) {
+                    commitSetToken(context, localToken);
+                    token = localToken;
+                }
+            }
+            if (token) {
+                try {
+                    const response = await api.getMe(token);
+                    commitSetLoggedIn(context, true);
+                    commitSetUserProfile(context, response.data);
+                } catch (error) {
+                    await dispatchRemoveLogIn(context);
+                }
+            } else {
+                await dispatchRemoveLogIn(context);
+            }
+        }
+    },
+    async actionRemoveLogIn(context: MainContext) {
+        removeLocalToken();
+        commitSetToken(context, "");
+        commitSetLoggedIn(context, false);
+    },
+    async actionLogOut(context: MainContext) {
+        commitSetLogInMethod(context, "");
         await dispatchRemoveLogIn(context);
-      }
-    }
-  },
-  async actionRemoveLogIn(context: MainContext) {
-    removeLocalToken();
-    commitSetToken(context, "");
-    commitSetLoggedIn(context, false);
-  },
-  async actionLogOut(context: MainContext) {
-    commitSetLogInMethod(context, "");
-    await dispatchRemoveLogIn(context);
-    await dispatchRouteLogOut(context);
-  },
-  async actionUserLogOut(context: MainContext) {
-    await dispatchLogOut(context);
-    commitAddNotification(context, { content: "Logged out", color: "success" });
-  },
-  actionRouteLogOut(context: MainContext) {
-    if (
-      router.currentRoute.path !== "/login" ||
-      !router.currentRoute.path.startsWith("/login-code") ||
-      !router.currentRoute.path.startsWith("/lc")
+        await dispatchRouteLogOut(context);
+    },
+    async actionUserLogOut(context: MainContext) {
+        await dispatchLogOut(context);
+        commitAddNotification(context, {
+            content: "Logged out",
+            color: "success",
+        });
+    },
+    actionRouteLogOut(context: MainContext) {
+        if (
+            router.currentRoute.path !== "/login" ||
+            !router.currentRoute.path.startsWith("/login-code") ||
+            !router.currentRoute.path.startsWith("/lc")
+        ) {
+            if (readLogInMethod(context) === "code") {
+                router.push("/login-code");
+            } else {
+                router.push("/login");
+            }
+        }
+    },
+    actionRouteLoggedIn(context: MainContext) {
+        if (
+            router.currentRoute.path === "/login" ||
+            router.currentRoute.path.startsWith("/login-code") ||
+            router.currentRoute.path.startsWith("/lc") ||
+            router.currentRoute.path.startsWith("/register") ||
+            router.currentRoute.path === "/"
+        ) {
+            router.push("/main");
+        }
+    },
+    async passwordRecovery(
+        context: MainContext,
+        payload: { username: string }
     ) {
-      if (readLogInMethod(context) === "code") {
-        router.push("/login-code");
-      } else {
-        router.push("/login");
-      }
-    }
-  },
-  async actionCheckApiError(context: MainContext, payload: AxiosError) {
-    if (payload.response!.status === 401) {
-      await dispatchLogOut(context);
-    }
-  },
-  actionRouteLoggedIn(context: MainContext) {
-    if (
-      router.currentRoute.path === "/login" ||
-      router.currentRoute.path.startsWith("/login-code") ||
-      router.currentRoute.path.startsWith("/lc") ||
-      router.currentRoute.path.startsWith("/register") ||
-      router.currentRoute.path === "/"
+        const loadingNotification = {
+            content: "Sending password recovery email",
+            showProgress: true,
+        };
+        try {
+            commitAddNotification(context, loadingNotification);
+            const response = (
+                await Promise.all([
+                    api.passwordRecovery(payload.username),
+                    await new Promise((resolve, reject) =>
+                        setTimeout(() => resolve(), 500)
+                    ),
+                ])
+            )[0];
+            commitRemoveNotification(context, loadingNotification);
+            commitAddNotification(context, {
+                content: "Password recovery email sent",
+                color: "success",
+            });
+            await dispatchLogOut(context);
+        } catch (error) {
+            commitRemoveNotification(context, loadingNotification);
+            commitAddNotification(context, {
+                color: "error",
+                content: "Incorrect username",
+            });
+        }
+    },
+    async resetPassword(
+        context: MainContext,
+        payload: { password: string; token: string }
     ) {
-      router.push("/main");
-    }
-  },
-  async removeNotification(
-    context: MainContext,
-    payload: { notification: AppNotification; timeout: number }
-  ) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        commitRemoveNotification(context, payload.notification);
-        resolve(true);
-      }, payload.timeout);
-    });
-  },
-  async passwordRecovery(context: MainContext, payload: { username: string }) {
-    const loadingNotification = {
-      content: "Sending password recovery email",
-      showProgress: true,
-    };
-    try {
-      commitAddNotification(context, loadingNotification);
-      const response = (
-        await Promise.all([
-          api.passwordRecovery(payload.username),
-          await new Promise((resolve, reject) =>
-            setTimeout(() => resolve(), 500)
-          ),
-        ])
-      )[0];
-      commitRemoveNotification(context, loadingNotification);
-      commitAddNotification(context, {
-        content: "Password recovery email sent",
-        color: "success",
-      });
-      await dispatchLogOut(context);
-    } catch (error) {
-      commitRemoveNotification(context, loadingNotification);
-      commitAddNotification(context, {
-        color: "error",
-        content: "Incorrect username",
-      });
-    }
-  },
-  async resetPassword(
-    context: MainContext,
-    payload: { password: string; token: string }
-  ) {
-    const loadingNotification = {
-      content: "Resetting password",
-      showProgress: true,
-    };
-    try {
-      commitAddNotification(context, loadingNotification);
-      const response = (
-        await Promise.all([
-          api.resetPassword(payload.password, payload.token),
-          await new Promise((resolve, reject) =>
-            setTimeout(() => resolve(), 500)
-          ),
-        ])
-      )[0];
-      commitRemoveNotification(context, loadingNotification);
-      commitAddNotification(context, {
-        content: "Password successfully reset",
-        color: "success",
-      });
-      await dispatchLogOut(context);
-    } catch (error) {
-      commitRemoveNotification(context, loadingNotification);
-      commitAddNotification(context, {
-        color: "error",
-        content: "Error resetting password",
-      });
-    }
-  },
-  async actionRegister(
-    context: MainContext,
-    payload: {
-      number: string;
-      name: string;
-      username?: string;
-      password?: string;
-    }
-  ) {
-    const loadingNotification = {
-      content: "Registering",
-      showProgress: true,
-    };
-    try {
-      commitAddNotification(context, loadingNotification);
-      const user = (
-        await Promise.all([
-          api.register(
-            payload.number,
-            payload.name,
-            payload.username,
-            payload.password
-          ),
-          await new Promise((resolve, reject) =>
-            setTimeout(() => resolve(), 500)
-          ),
-        ])
-      )[0];
-      commitRemoveNotification(context, loadingNotification);
-      const code = (
-        await Promise.all([
-          api.createLogInCode(user.data.id),
-          await new Promise((resolve, reject) =>
-            setTimeout(() => resolve(), 500)
-          ),
-        ])
-      )[0];
-      await dispatchLogInCode(context, { code: code.data.toString() });
-    } catch (error) {
-      commitRemoveNotification(context, loadingNotification);
-    }
-  },
+        const loadingNotification = {
+            content: "Resetting password",
+            showProgress: true,
+        };
+        try {
+            commitAddNotification(context, loadingNotification);
+            const response = (
+                await Promise.all([
+                    api.resetPassword(payload.password, payload.token),
+                    await new Promise((resolve, reject) =>
+                        setTimeout(() => resolve(), 500)
+                    ),
+                ])
+            )[0];
+            commitRemoveNotification(context, loadingNotification);
+            commitAddNotification(context, {
+                content: "Password successfully reset",
+                color: "success",
+            });
+            await dispatchLogOut(context);
+        } catch (error) {
+            commitRemoveNotification(context, loadingNotification);
+            commitAddNotification(context, {
+                color: "error",
+                content: "Error resetting password",
+            });
+        }
+    },
+    async actionRegister(
+        context: MainContext,
+        payload: {
+            number: string;
+            name: string;
+            username?: string;
+            password?: string;
+        }
+    ) {
+        const loadingNotification = {
+            content: "Registering",
+            showProgress: true,
+        };
+        try {
+            commitAddNotification(context, loadingNotification);
+            const user = (
+                await Promise.all([
+                    api.register(
+                        payload.number,
+                        payload.name,
+                        payload.username,
+                        payload.password
+                    ),
+                    await new Promise((resolve, reject) =>
+                        setTimeout(() => resolve(), 500)
+                    ),
+                ])
+            )[0];
+            commitRemoveNotification(context, loadingNotification);
+            const code = (
+                await Promise.all([
+                    api.createLogInCode(user.data.id),
+                    await new Promise((resolve, reject) =>
+                        setTimeout(() => resolve(), 500)
+                    ),
+                ])
+            )[0];
+            await dispatchLogInCode(context, { code: code.data.toString() });
+        } catch (error) {
+            commitRemoveNotification(context, loadingNotification);
+        }
+    },
+};
+
+/** User Actions */
+const user = {
+    async actionGetUserProfile(context: MainContext) {
+        try {
+            const response = await api.getMe(context.state.token);
+            if (response.data) {
+                commitSetUserProfile(context, response.data);
+            }
+        } catch (error) {
+            await dispatchCheckApiError(context, error);
+        }
+    },
+    async actionUpdateUserProfile(context: MainContext, payload) {
+        try {
+            const loadingNotification = {
+                content: "saving",
+                showProgress: true,
+            };
+            commitAddNotification(context, loadingNotification);
+            const response = (
+                await Promise.all([
+                    api.updateMe(context.state.token, payload),
+                    await new Promise((resolve, reject) =>
+                        setTimeout(() => resolve(), 500)
+                    ),
+                ])
+            )[0];
+            commitSetUserProfile(context, response.data);
+            commitRemoveNotification(context, loadingNotification);
+            commitAddNotification(context, {
+                content: "Profile successfully updated",
+                color: "success",
+            });
+        } catch (error) {
+            await dispatchCheckApiError(context, error);
+        }
+    },
+};
+
+/** Utility Actions */
+const utility = {
+    async actionCheckApiError(context: MainContext, payload: AxiosError) {
+        if (payload.response!.status === 401) {
+            await dispatchLogOut(context);
+        }
+    },
+    async removeNotification(
+        context: MainContext,
+        payload: { notification: AppNotification; timeout: number }
+    ) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                commitRemoveNotification(context, payload.notification);
+                resolve(true);
+            }, payload.timeout);
+        });
+    },
+};
+
+export const actions = {
+    ...login,
+    ...user,
+    ...utility,
 };
 
 const { dispatch } = getStoreAccessors<MainState | any, State>("");
 
-export const dispatchCheckApiError = dispatch(actions.actionCheckApiError);
+/** Login */
 export const dispatchCheckLoggedIn = dispatch(actions.actionCheckLoggedIn);
-export const dispatchGetUserProfile = dispatch(actions.actionGetUserProfile);
 export const dispatchLogIn = dispatch(actions.actionLogIn);
 export const dispatchLogInCode = dispatch(actions.actionLogInCode);
 export const dispatchLogOut = dispatch(actions.actionLogOut);
@@ -300,10 +323,16 @@ export const dispatchUserLogOut = dispatch(actions.actionUserLogOut);
 export const dispatchRemoveLogIn = dispatch(actions.actionRemoveLogIn);
 export const dispatchRouteLoggedIn = dispatch(actions.actionRouteLoggedIn);
 export const dispatchRouteLogOut = dispatch(actions.actionRouteLogOut);
-export const dispatchUpdateUserProfile = dispatch(
-  actions.actionUpdateUserProfile
-);
-export const dispatchRemoveNotification = dispatch(actions.removeNotification);
 export const dispatchPasswordRecovery = dispatch(actions.passwordRecovery);
 export const dispatchResetPassword = dispatch(actions.resetPassword);
 export const dispatchRegister = dispatch(actions.actionRegister);
+
+/** User */
+export const dispatchGetUserProfile = dispatch(actions.actionGetUserProfile);
+export const dispatchUpdateUserProfile = dispatch(
+    actions.actionUpdateUserProfile
+);
+
+/** Utility */
+export const dispatchCheckApiError = dispatch(actions.actionCheckApiError);
+export const dispatchRemoveNotification = dispatch(actions.removeNotification);
